@@ -1,0 +1,2207 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>HopDrop — Shared Delivery for Hyderabad</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Inter:wght@400;500;600&display=swap');
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  :root {
+    --orange: #FF6A3D;
+    --orange-light: #FF8A5C;
+    --orange-pale: #FFEEE6;
+    --blue: #3D6BFF;
+    --blue-light: #EAEFFF;
+    --ink: #1F2533;
+    --ink-mid: #5B6473;
+    --bg: #F6F7FB;
+    --white: #FFFFFF;
+    --grey: #9AA1AE;
+    --grey-light: #EEF0F4;
+    --green: #1FAE5F;
+    --green-light: #E6F8EE;
+    --yellow: #FFC542;
+    --yellow-light: #FFF7E2;
+  }
+
+  body {
+    background: linear-gradient(160deg, #FFB347 0%, #FF6A3D 55%, #3D6BFF 100%);
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: 'Inter', sans-serif;
+    padding: 20px;
+  }
+
+  /* Desktop wrapper */
+  .desktop-wrapper {
+    display: flex;
+    gap: 40px;
+    align-items: flex-start;
+    justify-content: center;
+    width: 100%;
+    max-width: 1200px;
+  }
+
+  .brand-panel {
+    flex: 1;
+    max-width: 320px;
+    color: white;
+    padding: 20px 0;
+  }
+
+  .brand-panel h1 {
+    font-family: 'Plus Jakarta Sans', sans-serif;
+    font-size: 48px;
+    font-weight: 800;
+    letter-spacing: -2px;
+    line-height: 1;
+    margin-bottom: 12px;
+  }
+
+  .brand-panel h1 span {
+    display: block;
+    font-size: 20px;
+    font-weight: 500;
+    letter-spacing: 0;
+    opacity: 0.85;
+    margin-top: 6px;
+  }
+
+  .brand-tagline {
+    font-size: 15px;
+    opacity: 0.85;
+    line-height: 1.6;
+    margin-bottom: 32px;
+    border-left: 3px solid rgba(255,255,255,0.4);
+    padding-left: 14px;
+  }
+
+  .role-switcher {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  .role-btn {
+    background: rgba(255,255,255,0.14);
+    border: 1.5px solid rgba(255,255,255,0.3);
+    border-radius: 14px;
+    padding: 14px 18px;
+    color: white;
+    cursor: pointer;
+    text-align: left;
+    transition: all 0.2s;
+    backdrop-filter: blur(10px);
+  }
+
+  .role-btn:hover, .role-btn.active {
+    background: rgba(255,255,255,0.97);
+    color: var(--orange);
+    border-color: white;
+    transform: translateX(4px);
+  }
+
+  .role-btn .role-title {
+    font-family: 'Plus Jakarta Sans', sans-serif;
+    font-weight: 700;
+    font-size: 15px;
+  }
+
+  .role-btn .role-desc {
+    font-size: 12px;
+    opacity: 0.75;
+    margin-top: 2px;
+  }
+
+  .role-btn:hover .role-desc, .role-btn.active .role-desc {
+    opacity: 0.6;
+    color: var(--ink-mid);
+  }
+
+  /* Phone frame */
+  .phone-frame {
+    width: 390px;
+    height: 780px;
+    background: #14161C;
+    border-radius: 50px;
+    padding: 12px;
+    box-shadow: 0 40px 80px rgba(0,0,0,0.35), 0 0 0 1px rgba(255,255,255,0.08);
+    flex-shrink: 0;
+    position: relative;
+  }
+
+  .phone-notch {
+    width: 120px;
+    height: 30px;
+    background: #14161C;
+    border-radius: 0 0 20px 20px;
+    position: absolute;
+    top: 12px;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 10;
+  }
+
+  .phone-screen {
+    width: 100%;
+    height: 100%;
+    background: var(--bg);
+    border-radius: 40px;
+    overflow: hidden;
+    position: relative;
+  }
+
+  /* Screen views */
+  .screen {
+    position: absolute;
+    top: 0; left: 0; right: 0; bottom: 0;
+    overflow-y: auto;
+    display: none;
+    flex-direction: column;
+    background: var(--bg);
+    scrollbar-width: none;
+  }
+
+  .screen::-webkit-scrollbar { display: none; }
+  .screen.active { display: flex; }
+
+  /* Pages within a screen */
+  .page { display: none; flex-direction: column; flex: 1; }
+  .page.active { display: flex; }
+
+  /* Status bar */
+  .status-bar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 14px 24px 8px;
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--ink);
+    flex-shrink: 0;
+  }
+
+  /* Header */
+  .app-header {
+    padding: 8px 20px 16px;
+    flex-shrink: 0;
+  }
+
+  .app-header-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+
+  .logo {
+    font-family: 'Plus Jakarta Sans', sans-serif;
+    font-size: 22px;
+    font-weight: 800;
+    color: var(--orange);
+    letter-spacing: -0.5px;
+  }
+
+  .logo span {
+    color: var(--ink);
+  }
+
+  .avatar {
+    width: 36px;
+    height: 36px;
+    border-radius: 12px;
+    background: var(--orange-pale);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 17px;
+    cursor: pointer;
+  }
+
+  .greeting {
+    font-size: 13px;
+    color: var(--ink-mid);
+    margin-top: 4px;
+  }
+
+  .greeting strong {
+    color: var(--ink);
+    font-weight: 700;
+  }
+
+  .page-title {
+    font-family: 'Plus Jakarta Sans', sans-serif;
+    font-size: 22px;
+    font-weight: 800;
+    color: var(--ink);
+    margin-top: 2px;
+  }
+
+  /* Hero card */
+  .hero-card {
+    margin: 0 20px 16px;
+    background: linear-gradient(135deg, var(--orange) 0%, var(--orange-light) 100%);
+    border-radius: 20px;
+    padding: 20px;
+    color: white;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .hero-card::after {
+    content: '📦';
+    position: absolute;
+    right: 16px;
+    bottom: 8px;
+    font-size: 48px;
+    opacity: 0.25;
+  }
+
+  .hero-card h3 {
+    font-family: 'Plus Jakarta Sans', sans-serif;
+    font-size: 17px;
+    font-weight: 700;
+    margin-bottom: 6px;
+  }
+
+  .hero-card p {
+    font-size: 12px;
+    opacity: 0.9;
+    line-height: 1.5;
+    max-width: 200px;
+  }
+
+  .hero-btn {
+    margin-top: 14px;
+    background: white;
+    color: var(--orange);
+    border: none;
+    border-radius: 10px;
+    padding: 9px 18px;
+    font-size: 13px;
+    font-weight: 700;
+    font-family: 'Plus Jakarta Sans', sans-serif;
+    cursor: pointer;
+  }
+
+  /* Section */
+  .section {
+    padding: 0 20px 16px;
+  }
+
+  .section-title {
+    font-family: 'Plus Jakarta Sans', sans-serif;
+    font-size: 14px;
+    font-weight: 700;
+    color: var(--ink);
+    margin-bottom: 12px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+
+  .section-title a {
+    font-size: 12px;
+    color: var(--orange);
+    font-weight: 600;
+    text-decoration: none;
+    font-family: 'Inter', sans-serif;
+    cursor: pointer;
+  }
+
+  /* Stats row */
+  .stats-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 10px;
+    margin: 0 20px 16px;
+  }
+
+  .stat-card {
+    background: var(--white);
+    border-radius: 14px;
+    padding: 14px 12px;
+    text-align: center;
+    box-shadow: 0 2px 10px rgba(31,37,51,0.05);
+  }
+
+  .stat-num {
+    font-family: 'Plus Jakarta Sans', sans-serif;
+    font-size: 20px;
+    font-weight: 800;
+    color: var(--orange);
+  }
+
+  .stat-label {
+    font-size: 10px;
+    color: var(--ink-mid);
+    margin-top: 2px;
+    line-height: 1.3;
+  }
+
+  /* Delivery card */
+  .delivery-card {
+    background: var(--white);
+    border-radius: 16px;
+    padding: 14px 16px;
+    margin-bottom: 10px;
+    box-shadow: 0 2px 10px rgba(31,37,51,0.05);
+  }
+
+  .delivery-card-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 10px;
+  }
+
+  .delivery-id {
+    font-size: 11px;
+    color: var(--grey);
+    font-weight: 500;
+  }
+
+  .delivery-name {
+    font-family: 'Plus Jakarta Sans', sans-serif;
+    font-size: 14px;
+    font-weight: 700;
+    color: var(--ink);
+    margin-top: 2px;
+  }
+
+  .status-badge {
+    font-size: 11px;
+    font-weight: 700;
+    padding: 4px 10px;
+    border-radius: 20px;
+    white-space: nowrap;
+  }
+
+  .status-badge.picked { background: var(--blue-light); color: var(--blue); }
+  .status-badge.delivered { background: var(--green-light); color: var(--green); }
+  .status-badge.pending { background: var(--grey-light); color: var(--ink-mid); }
+  .status-badge.active { background: var(--yellow-light); color: #B5790A; }
+
+  .route-line {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 12px;
+    color: var(--ink-mid);
+  }
+
+  .route-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    flex-shrink: 0;
+  }
+
+  .route-dot.pickup { background: var(--orange); }
+  .route-dot.drop { background: var(--blue); }
+  .route-connector {
+    width: 1px;
+    height: 12px;
+    background: var(--grey-light);
+    margin-left: 3.5px;
+  }
+
+  .delivery-footer {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-top: 10px;
+    padding-top: 10px;
+    border-top: 1px solid var(--grey-light);
+  }
+
+  .delivery-price {
+    font-family: 'Plus Jakarta Sans', sans-serif;
+    font-size: 15px;
+    font-weight: 700;
+    color: var(--orange);
+  }
+
+  .delivery-time {
+    font-size: 11px;
+    color: var(--grey);
+  }
+
+  /* Form */
+  .form-card {
+    background: var(--white);
+    border-radius: 20px;
+    padding: 20px;
+    margin: 0 20px 16px;
+    box-shadow: 0 2px 10px rgba(31,37,51,0.05);
+  }
+
+  .form-title {
+    font-family: 'Plus Jakarta Sans', sans-serif;
+    font-size: 16px;
+    font-weight: 700;
+    color: var(--ink);
+    margin-bottom: 16px;
+  }
+
+  .form-group {
+    margin-bottom: 14px;
+  }
+
+  .form-label {
+    font-size: 11px;
+    font-weight: 700;
+    color: var(--grey);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin-bottom: 6px;
+    display: block;
+  }
+
+  .form-input {
+    width: 100%;
+    padding: 11px 14px;
+    border: 1.5px solid var(--grey-light);
+    border-radius: 12px;
+    font-size: 13px;
+    color: var(--ink);
+    background: var(--bg);
+    font-family: 'Inter', sans-serif;
+    outline: none;
+    transition: border-color 0.2s;
+  }
+
+  .form-input:focus {
+    border-color: var(--orange);
+    background: white;
+  }
+
+  .form-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+  }
+
+  .size-options {
+    display: flex;
+    gap: 8px;
+  }
+
+  .size-opt {
+    flex: 1;
+    padding: 10px 8px;
+    border: 1.5px solid var(--grey-light);
+    border-radius: 12px;
+    text-align: center;
+    cursor: pointer;
+    transition: all 0.2s;
+    background: var(--bg);
+  }
+
+  .size-opt.selected {
+    border-color: var(--orange);
+    background: var(--orange-pale);
+  }
+
+  .size-opt .size-icon { font-size: 20px; }
+  .size-opt .size-label {
+    font-size: 11px;
+    font-weight: 700;
+    color: var(--ink);
+    margin-top: 4px;
+    display: block;
+  }
+
+  .size-opt .size-price {
+    font-size: 10px;
+    color: var(--grey);
+  }
+
+  /* Primary button */
+  .btn-primary {
+    width: 100%;
+    padding: 15px;
+    background: var(--orange);
+    color: white;
+    border: none;
+    border-radius: 14px;
+    font-family: 'Plus Jakarta Sans', sans-serif;
+    font-size: 15px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: background 0.2s, transform 0.1s;
+  }
+
+  .btn-primary:hover { background: var(--orange-light); }
+  .btn-primary:active { transform: scale(0.98); }
+
+  .btn-secondary {
+    width: 100%;
+    padding: 13px;
+    background: var(--orange-pale);
+    color: var(--orange);
+    border: none;
+    border-radius: 14px;
+    font-family: 'Plus Jakarta Sans', sans-serif;
+    font-size: 14px;
+    font-weight: 700;
+    cursor: pointer;
+    margin-top: 10px;
+  }
+
+  .btn-ghost {
+    width: 100%;
+    padding: 13px;
+    background: var(--white);
+    color: var(--ink);
+    border: 1.5px solid var(--grey-light);
+    border-radius: 14px;
+    font-family: 'Plus Jakarta Sans', sans-serif;
+    font-size: 14px;
+    font-weight: 700;
+    cursor: pointer;
+    margin-top: 10px;
+  }
+
+  /* Rider batch card */
+  .batch-card {
+    background: var(--white);
+    border-radius: 16px;
+    padding: 16px;
+    margin-bottom: 12px;
+    box-shadow: 0 2px 10px rgba(31,37,51,0.05);
+    border-left: 4px solid var(--orange);
+  }
+
+  .batch-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 12px;
+  }
+
+  .batch-title {
+    font-family: 'Plus Jakarta Sans', sans-serif;
+    font-size: 14px;
+    font-weight: 700;
+    color: var(--ink);
+  }
+
+  .batch-earn {
+    font-family: 'Plus Jakarta Sans', sans-serif;
+    font-size: 16px;
+    font-weight: 800;
+    color: var(--green);
+  }
+
+  .batch-stops {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    margin-bottom: 12px;
+  }
+
+  .stop-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-size: 12px;
+    color: var(--ink-mid);
+  }
+
+  .stop-num {
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    background: var(--orange-pale);
+    color: var(--orange);
+    font-size: 10px;
+    font-weight: 700;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+  }
+
+  .batch-meta {
+    display: flex;
+    gap: 12px;
+    font-size: 11px;
+    color: var(--grey);
+    padding-top: 10px;
+    border-top: 1px solid var(--grey-light);
+  }
+
+  .batch-meta span { display: flex; align-items: center; gap: 4px; }
+
+  /* Tracking */
+  .track-card {
+    background: var(--white);
+    border-radius: 20px;
+    padding: 20px;
+    margin: 0 20px 16px;
+    box-shadow: 0 2px 10px rgba(31,37,51,0.05);
+  }
+
+  .track-steps {
+    display: flex;
+    flex-direction: column;
+    gap: 0;
+    margin-top: 16px;
+  }
+
+  .track-step {
+    display: flex;
+    gap: 14px;
+    align-items: flex-start;
+    position: relative;
+  }
+
+  .track-step-left {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    flex-shrink: 0;
+  }
+
+  .track-icon {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 14px;
+    z-index: 1;
+  }
+
+  .track-icon.done { background: var(--orange); }
+  .track-icon.current { background: var(--blue-light); border: 2px solid var(--blue); }
+  .track-icon.upcoming { background: var(--grey-light); }
+
+  .track-line {
+    width: 2px;
+    height: 28px;
+    background: var(--grey-light);
+    margin: 0 auto;
+  }
+
+  .track-line.done { background: var(--orange); }
+
+  .track-content {
+    padding-bottom: 20px;
+  }
+
+  .track-step-title {
+    font-family: 'Plus Jakarta Sans', sans-serif;
+    font-size: 13px;
+    font-weight: 700;
+    color: var(--ink);
+    margin-top: 6px;
+  }
+
+  .track-step-sub {
+    font-size: 11px;
+    color: var(--grey);
+    margin-top: 2px;
+  }
+
+  /* Map placeholder */
+  .map-placeholder {
+    margin: 0 20px 16px;
+    height: 140px;
+    background: linear-gradient(135deg, var(--blue-light) 0%, #DCE5FF 100%);
+    border-radius: 16px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-direction: column;
+    gap: 6px;
+    color: var(--blue);
+    font-size: 13px;
+    font-weight: 700;
+    overflow: hidden;
+    position: relative;
+  }
+
+  .map-grid {
+    position: absolute;
+    top: 0; left: 0; right: 0; bottom: 0;
+    background-image: 
+      linear-gradient(rgba(61,107,255,0.10) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(61,107,255,0.10) 1px, transparent 1px);
+    background-size: 20px 20px;
+  }
+
+  .map-pin {
+    font-size: 28px;
+    z-index: 1;
+    animation: bounce 1.5s infinite;
+  }
+
+  @keyframes bounce {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-6px); }
+  }
+
+  /* Bottom nav */
+  .bottom-nav {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    background: var(--white);
+    border-top: 1px solid var(--grey-light);
+    display: flex;
+    padding: 10px 0 20px;
+    border-radius: 0 0 40px 40px;
+    flex-shrink: 0;
+  }
+
+  .nav-item {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 3px;
+    cursor: pointer;
+    padding: 4px 0;
+    position: relative;
+  }
+
+  .nav-icon { font-size: 20px; }
+  .nav-label { font-size: 10px; color: var(--grey); font-weight: 600; }
+  .nav-item.active .nav-label { color: var(--orange); font-weight: 800; }
+  .nav-item.active .nav-icon { transform: translateY(-1px); }
+
+  /* Profile */
+  .profile-head {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    margin: 0 20px 16px;
+    background: var(--white);
+    border-radius: 18px;
+    padding: 18px;
+    box-shadow: 0 2px 10px rgba(31,37,51,0.05);
+  }
+
+  .profile-avatar {
+    width: 56px;
+    height: 56px;
+    border-radius: 16px;
+    background: var(--orange-pale);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 26px;
+    flex-shrink: 0;
+  }
+
+  .profile-name {
+    font-family: 'Plus Jakarta Sans', sans-serif;
+    font-size: 16px;
+    font-weight: 800;
+    color: var(--ink);
+  }
+
+  .profile-sub {
+    font-size: 12px;
+    color: var(--grey);
+    margin-top: 2px;
+  }
+
+  .list-row {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    background: var(--white);
+    border-radius: 14px;
+    padding: 14px 16px;
+    margin-bottom: 8px;
+    box-shadow: 0 2px 10px rgba(31,37,51,0.05);
+    cursor: pointer;
+  }
+
+  .list-row-icon {
+    width: 36px;
+    height: 36px;
+    border-radius: 10px;
+    background: var(--bg);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 17px;
+    flex-shrink: 0;
+  }
+
+  .list-row-title {
+    font-size: 13px;
+    font-weight: 700;
+    color: var(--ink);
+  }
+
+  .list-row-sub {
+    font-size: 11px;
+    color: var(--grey);
+    margin-top: 1px;
+  }
+
+  .list-row-arrow {
+    color: var(--grey);
+    font-size: 14px;
+  }
+
+  /* Earnings */
+  .earnings-hero {
+    margin: 0 20px 16px;
+    background: linear-gradient(135deg, var(--blue) 0%, #6E8DFF 100%);
+    border-radius: 20px;
+    padding: 20px;
+    color: white;
+  }
+
+  .earnings-hero-label { font-size: 12px; opacity: 0.85; }
+  .earnings-hero-num {
+    font-family: 'Plus Jakarta Sans', sans-serif;
+    font-size: 32px;
+    font-weight: 800;
+    margin-top: 4px;
+  }
+
+  .earnings-hero-row {
+    display: flex;
+    gap: 18px;
+    margin-top: 14px;
+  }
+
+  .earnings-hero-row div { font-size: 12px; }
+  .earnings-hero-row strong { display: block; font-size: 15px; font-weight: 800; margin-top: 2px; }
+
+  /* Scrollable content area */
+  .scroll-content {
+    flex: 1;
+    overflow-y: auto;
+    padding-bottom: 80px;
+    scrollbar-width: none;
+    padding-top: 4px;
+  }
+  .scroll-content::-webkit-scrollbar { display: none; }
+
+  /* Toast */
+  .toast {
+    position: absolute;
+    bottom: 90px;
+    left: 20px;
+    right: 20px;
+    background: var(--ink);
+    color: white;
+    padding: 12px 16px;
+    border-radius: 14px;
+    font-size: 13px;
+    font-weight: 600;
+    display: none;
+    z-index: 100;
+    animation: slideUp 0.3s ease;
+  }
+
+  @keyframes slideUp {
+    from { transform: translateY(20px); opacity: 0; }
+    to { transform: translateY(0); opacity: 1; }
+  }
+
+  .info-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    background: var(--orange-pale);
+    color: var(--orange);
+    font-size: 11px;
+    font-weight: 700;
+    padding: 5px 10px;
+    border-radius: 20px;
+    margin-bottom: 14px;
+  }
+
+  .info-chip.blue { background: var(--blue-light); color: var(--blue); }
+
+  .back-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 8px 20px 4px;
+  }
+
+  .back-btn {
+    width: 32px;
+    height: 32px;
+    border-radius: 10px;
+    background: var(--white);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    font-size: 15px;
+    box-shadow: 0 2px 8px rgba(31,37,51,0.06);
+    flex-shrink: 0;
+  }
+
+  /* Compare cards (cost comparison) */
+  .compare-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+    margin-bottom: 14px;
+  }
+
+  .compare-card {
+    background: var(--white);
+    border-radius: 16px;
+    padding: 14px;
+    text-align: center;
+    box-shadow: 0 2px 10px rgba(31,37,51,0.05);
+  }
+
+  .compare-card.dim { opacity: 0.6; }
+  .compare-label { font-size: 11px; color: var(--grey); font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; }
+  .compare-amt {
+    font-family: 'Plus Jakarta Sans', sans-serif;
+    font-size: 26px;
+    font-weight: 800;
+    margin-top: 6px;
+  }
+  .compare-card.dim .compare-amt { color: var(--ink-mid); text-decoration: line-through; }
+  .compare-card.win .compare-amt { color: var(--green); }
+  .compare-arrow {
+    text-align: center;
+    font-size: 20px;
+    color: var(--grey);
+    margin-bottom: 6px;
+  }
+
+  /* Savings banner */
+  .savings-banner {
+    margin: 0 20px 16px;
+    background: linear-gradient(135deg, var(--green) 0%, #2ED074 100%);
+    border-radius: 20px;
+    padding: 18px 20px;
+    color: white;
+    text-align: center;
+  }
+  .savings-banner .big {
+    font-family: 'Plus Jakarta Sans', sans-serif;
+    font-size: 30px;
+    font-weight: 800;
+  }
+  .savings-banner .small { font-size: 12px; opacity: 0.9; margin-top: 4px; }
+
+  /* Route path list */
+  .route-path { display: flex; flex-direction: column; }
+  .route-path-step { display: flex; gap: 14px; align-items: flex-start; }
+  .route-path-left { display: flex; flex-direction: column; align-items: center; flex-shrink: 0; }
+  .route-path-dot {
+    width: 28px; height: 28px; border-radius: 50%;
+    background: var(--orange); color: white;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 12px; font-weight: 800; font-family: 'Plus Jakarta Sans', sans-serif;
+    z-index: 1;
+  }
+  .route-path-dot.end { background: var(--blue); }
+  .route-path-line { width: 2px; flex: 1; min-height: 24px; background: var(--orange-pale); margin: 0 auto; }
+  .route-path-content { padding-bottom: 18px; }
+  .route-path-title { font-family: 'Plus Jakarta Sans', sans-serif; font-weight: 700; font-size: 13px; color: var(--ink); margin-top: 4px; }
+  .route-path-sub { font-size: 11px; color: var(--grey); margin-top: 2px; }
+
+  /* Utilization bars */
+  .util-row { margin-bottom: 14px; }
+  .util-row-head { display: flex; justify-content: space-between; font-size: 12px; font-weight: 700; color: var(--ink); margin-bottom: 6px; }
+  .util-bar-bg { height: 10px; background: var(--grey-light); border-radius: 6px; overflow: hidden; }
+  .util-bar-fill { height: 100%; border-radius: 6px; background: var(--green); }
+
+  /* Ops stat grid */
+  .ops-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin: 0 20px 16px; }
+  .ops-card {
+    background: var(--white);
+    border-radius: 16px;
+    padding: 16px;
+    box-shadow: 0 2px 10px rgba(31,37,51,0.05);
+  }
+  .ops-card .ops-num {
+    font-family: 'Plus Jakarta Sans', sans-serif;
+    font-size: 24px;
+    font-weight: 800;
+    color: var(--ink);
+  }
+  .ops-card .ops-label { font-size: 11px; color: var(--grey); margin-top: 4px; font-weight: 600; }
+  .ops-card.accent .ops-num { color: var(--orange); }
+  .ops-card.blue .ops-num { color: var(--blue); }
+  .ops-card.green .ops-num { color: var(--green); }
+</style>
+</head>
+<body>
+
+<div class="desktop-wrapper">
+
+  <!-- Brand panel -->
+  <div class="brand-panel">
+    <h1>Hop<span style="color:rgba(255,255,255,0.7)">Drop</span>
+      <span>Shared delivery for<br>Hyderabad's sellers</span>
+    </h1>
+    <p class="brand-tagline">One rider. Multiple sellers. Same-day delivery at ₹40 — not ₹100.</p>
+
+    <div class="role-switcher">
+      <div class="role-btn active" onclick="switchRole('seller', event)">
+        <div class="role-title">🏪 I'm a Seller</div>
+        <div class="role-desc">Book a delivery for your order</div>
+      </div>
+      <div class="role-btn" onclick="switchRole('buyer', event)">
+        <div class="role-title">🛍️ I'm a Buyer</div>
+        <div class="role-desc">Track my delivery & order history</div>
+      </div>
+      <div class="role-btn" onclick="switchRole('rider', event)">
+        <div class="role-title">🏍️ I'm a Rider</div>
+        <div class="role-desc">See available delivery batches</div>
+      </div>
+    </div>
+
+    <div style="margin-top: 28px; color: rgba(255,255,255,0.55); font-size: 12px; line-height: 1.7;">
+      <div style="font-weight:700; color:rgba(255,255,255,0.8); margin-bottom:4px; letter-spacing:0.5px;">DEMO ENVIRONMENT</div>
+      <div>🏪 <strong style="color:white">12</strong> sample sellers</div>
+      <div>📦 <strong style="color:white">8</strong> sample deliveries</div>
+      <div>🏍️ <strong style="color:white">3</strong> sample riders</div>
+    </div>
+  </div>
+
+  <!-- Phone frame -->
+  <div class="phone-frame">
+    <div class="phone-notch"></div>
+    <div class="phone-screen">
+
+      <!-- ==================== SELLER SCREEN ==================== -->
+      <div class="screen active" id="screen-seller">
+
+        <!-- SELLER: HOME -->
+        <div class="page active" id="seller-page-home">
+          <div class="status-bar">
+            <span>9:41</span>
+            <span>●●●●  WiFi  🔋</span>
+          </div>
+          <div class="app-header">
+            <div class="app-header-row">
+              <div class="logo">Hop<span>Drop</span></div>
+              <div class="avatar" onclick="showPage('seller','profile')">🏪</div>
+            </div>
+            <div class="greeting">Good morning, <strong>Meera's Boutique</strong> 👋</div>
+          </div>
+
+          <div class="scroll-content">
+            <div class="stats-row">
+              <div class="stat-card">
+                <div class="stat-num">24</div>
+                <div class="stat-label">Orders this month</div>
+              </div>
+              <div class="stat-card">
+                <div class="stat-num">₹960</div>
+                <div class="stat-label">Saved vs other apps</div>
+              </div>
+              <div class="stat-card">
+                <div class="stat-num">4.9⭐</div>
+                <div class="stat-label">Your rating</div>
+              </div>
+            </div>
+
+            <div class="section">
+              <div class="section-title">Book a Delivery</div>
+              <div class="form-card" style="margin: 0 0 12px;">
+                <div class="form-group">
+                  <label class="form-label">📍 Pickup From</label>
+                  <input class="form-input" value="Meera's Boutique, Kondapur" readonly>
+                </div>
+                <div class="form-group">
+                  <label class="form-label">📬 Drop To</label>
+                  <input class="form-input" id="drop-addr" placeholder="Enter buyer's address...">
+                </div>
+                <div class="form-group">
+                  <label class="form-label">📦 Item Size</label>
+                  <div class="size-options">
+                    <div class="size-opt selected" onclick="selectSize(this,35)">
+                      <div class="size-icon">👜</div>
+                      <span class="size-label">Small</span>
+                      <div class="size-price">₹35</div>
+                    </div>
+                    <div class="size-opt" onclick="selectSize(this,45)">
+                      <div class="size-icon">📦</div>
+                      <span class="size-label">Medium</span>
+                      <div class="size-price">₹45</div>
+                    </div>
+                    <div class="size-opt" onclick="selectSize(this,60)">
+                      <div class="size-icon">🗃️</div>
+                      <span class="size-label">Large</span>
+                      <div class="size-price">₹60</div>
+                    </div>
+                  </div>
+                </div>
+                <div class="form-row">
+                  <div class="form-group" style="margin:0">
+                    <label class="form-label">Buyer Name</label>
+                    <input class="form-input" id="buyer-name" placeholder="Priya S.">
+                  </div>
+                  <div class="form-group" style="margin:0">
+                    <label class="form-label">Buyer Phone</label>
+                    <input class="form-input" id="buyer-phone" placeholder="98765...">
+                  </div>
+                </div>
+              </div>
+
+              <!-- Truck sharing -->
+              <div class="hero-card" style="background: linear-gradient(135deg, var(--ink) 0%, #3A4252 100%);">
+                <h3>🚛 Need to move bulk stock?</h3>
+                <p>Share a truck with other businesses on your route. Pay only for the space you use.</p>
+                <button class="hero-btn" style="margin-top:14px; color: var(--ink);" onclick="showToast('🚛 Truck sharing coming soon! We\'ll notify you.','seller')">Book Truck Space</button>
+              </div>
+
+              <button class="btn-primary" id="book-btn" onclick="bookDelivery()">Book Delivery — ₹35</button>
+            </div>
+
+            <div class="section">
+              <div class="section-title">Your Active Orders <a onclick="showPage('seller','orders')">See all</a></div>
+
+              <div class="delivery-card">
+                <div class="delivery-card-header">
+                  <div>
+                    <div class="delivery-id">HD-2841 · Today 11:30 AM</div>
+                    <div class="delivery-name">Floral Kurti (S)</div>
+                  </div>
+                  <span class="status-badge picked">In Transit</span>
+                </div>
+                <div class="route-line"><div class="route-dot pickup"></div> Kondapur, Meera's Boutique</div>
+                <div class="route-connector" style="margin-left:3px;"></div>
+                <div class="route-line"><div class="route-dot drop"></div> Madhapur, Priya Sharma</div>
+                <div class="delivery-footer">
+                  <div class="delivery-price">₹35</div>
+                  <div class="delivery-time">ETA 12:15 PM</div>
+                </div>
+              </div>
+
+              <div class="delivery-card">
+                <div class="delivery-card-header">
+                  <div>
+                    <div class="delivery-id">HD-2836 · Today 10:00 AM</div>
+                    <div class="delivery-name">Embroidered Dupatta</div>
+                  </div>
+                  <span class="status-badge delivered">Delivered ✓</span>
+                </div>
+                <div class="route-line"><div class="route-dot pickup"></div> Kondapur, Meera's Boutique</div>
+                <div class="route-connector" style="margin-left:3px;"></div>
+                <div class="route-line"><div class="route-dot drop"></div> Gachibowli, Ananya K.</div>
+                <div class="delivery-footer">
+                  <div class="delivery-price">₹35</div>
+                  <div class="delivery-time">Delivered 11:02 AM</div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="bottom-nav">
+            <div class="nav-item active" onclick="showPage('seller','home')"><div class="nav-icon">🏠</div><div class="nav-label">Home</div></div>
+            <div class="nav-item" onclick="showPage('seller','orders')"><div class="nav-icon">📦</div><div class="nav-label">Orders</div></div>
+            <div class="nav-item" onclick="showPage('seller','earnings')"><div class="nav-icon">💳</div><div class="nav-label">Earnings</div></div>
+            <div class="nav-item" onclick="showPage('seller','profile')"><div class="nav-icon">👤</div><div class="nav-label">Profile</div></div>
+          </div>
+
+          <div class="toast" id="toast-seller"></div>
+        </div>
+
+        <!-- SELLER: ORDERS -->
+        <div class="page" id="seller-page-orders">
+          <div class="status-bar">
+            <span>9:41</span>
+            <span>●●●●  WiFi  🔋</span>
+          </div>
+          <div class="app-header">
+            <div class="page-title">Your Orders</div>
+            <div class="greeting">All deliveries booked from your store</div>
+          </div>
+          <div class="scroll-content">
+            <div class="section">
+              <div class="section-title">In Progress</div>
+              <div class="delivery-card">
+                <div class="delivery-card-header">
+                  <div>
+                    <div class="delivery-id">HD-2841 · Today 11:30 AM</div>
+                    <div class="delivery-name">Floral Kurti (S)</div>
+                  </div>
+                  <span class="status-badge picked">In Transit</span>
+                </div>
+                <div class="route-line"><div class="route-dot pickup"></div> Kondapur, Meera's Boutique</div>
+                <div class="route-connector" style="margin-left:3px;"></div>
+                <div class="route-line"><div class="route-dot drop"></div> Madhapur, Priya Sharma</div>
+                <div class="delivery-footer">
+                  <div class="delivery-price">₹35</div>
+                  <div class="delivery-time">ETA 12:15 PM</div>
+                </div>
+              </div>
+            </div>
+            <div class="section">
+              <div class="section-title">Completed</div>
+              <div class="delivery-card">
+                <div class="delivery-card-header">
+                  <div>
+                    <div class="delivery-id">HD-2836 · Today 10:00 AM</div>
+                    <div class="delivery-name">Embroidered Dupatta</div>
+                  </div>
+                  <span class="status-badge delivered">Delivered ✓</span>
+                </div>
+                <div class="route-line"><div class="route-dot pickup"></div> Kondapur, Meera's Boutique</div>
+                <div class="route-connector" style="margin-left:3px;"></div>
+                <div class="route-line"><div class="route-dot drop"></div> Gachibowli, Ananya K.</div>
+                <div class="delivery-footer">
+                  <div class="delivery-price">₹35</div>
+                  <div class="delivery-time">Delivered 11:02 AM</div>
+                </div>
+              </div>
+              <div class="delivery-card">
+                <div class="delivery-card-header">
+                  <div>
+                    <div class="delivery-id">HD-2819 · Yesterday</div>
+                    <div class="delivery-name">Cotton Saree (Set of 2)</div>
+                  </div>
+                  <span class="status-badge delivered">Delivered ✓</span>
+                </div>
+                <div class="route-line"><div class="route-dot pickup"></div> Kondapur, Meera's Boutique</div>
+                <div class="route-connector" style="margin-left:3px;"></div>
+                <div class="route-line"><div class="route-dot drop"></div> HITEC City, Sana R.</div>
+                <div class="delivery-footer">
+                  <div class="delivery-price">₹45</div>
+                  <div class="delivery-time">Delivered 6:40 PM</div>
+                </div>
+              </div>
+              <div class="delivery-card">
+                <div class="delivery-card-header">
+                  <div>
+                    <div class="delivery-id">HD-2790 · 2 days ago</div>
+                    <div class="delivery-name">Silk Stole</div>
+                  </div>
+                  <span class="status-badge delivered">Delivered ✓</span>
+                </div>
+                <div class="route-line"><div class="route-dot pickup"></div> Kondapur, Meera's Boutique</div>
+                <div class="route-connector" style="margin-left:3px;"></div>
+                <div class="route-line"><div class="route-dot drop"></div> Jubilee Hills, Arjun M.</div>
+                <div class="delivery-footer">
+                  <div class="delivery-price">₹35</div>
+                  <div class="delivery-time">Delivered 4:12 PM</div>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="bottom-nav">
+            <div class="nav-item" onclick="showPage('seller','home')"><div class="nav-icon">🏠</div><div class="nav-label">Home</div></div>
+            <div class="nav-item active" onclick="showPage('seller','orders')"><div class="nav-icon">📦</div><div class="nav-label">Orders</div></div>
+            <div class="nav-item" onclick="showPage('seller','earnings')"><div class="nav-icon">💳</div><div class="nav-label">Earnings</div></div>
+            <div class="nav-item" onclick="showPage('seller','profile')"><div class="nav-icon">👤</div><div class="nav-label">Profile</div></div>
+          </div>
+        </div>
+
+        <!-- SELLER: EARNINGS -->
+        <div class="page" id="seller-page-earnings">
+          <div class="status-bar">
+            <span>9:41</span>
+            <span>●●●●  WiFi  🔋</span>
+          </div>
+          <div class="app-header">
+            <div class="page-title">Earnings</div>
+            <div class="greeting">Your savings vs regular delivery apps</div>
+          </div>
+          <div class="scroll-content">
+            <div class="compare-row">
+              <div class="compare-card dim">
+                <div class="compare-label">Rapido Equivalent</div>
+                <div class="compare-amt">₹2,400</div>
+              </div>
+              <div class="compare-card win">
+                <div class="compare-label">HopDrop Cost</div>
+                <div class="compare-amt">₹1,440</div>
+              </div>
+            </div>
+            <div class="earnings-hero">
+              <div class="earnings-hero-label">Total saved this month</div>
+              <div class="earnings-hero-num">₹960</div>
+              <div class="earnings-hero-row">
+                <div>Deliveries<strong>24</strong></div>
+                <div>Avg saving<strong>40%</strong></div>
+                <div>Avg cost<strong>₹38</strong></div>
+              </div>
+            </div>
+            <div class="section">
+              <div class="section-title">Recent Charges</div>
+              <div class="list-row">
+                <div class="list-row-icon">📦</div>
+                <div style="flex:1">
+                  <div class="list-row-title">HD-2841 · Floral Kurti</div>
+                  <div class="list-row-sub">Today, 11:30 AM</div>
+                </div>
+                <div class="delivery-price">₹35</div>
+              </div>
+              <div class="list-row">
+                <div class="list-row-icon">📦</div>
+                <div style="flex:1">
+                  <div class="list-row-title">HD-2836 · Dupatta</div>
+                  <div class="list-row-sub">Today, 10:00 AM</div>
+                </div>
+                <div class="delivery-price">₹35</div>
+              </div>
+              <div class="list-row">
+                <div class="list-row-icon">📦</div>
+                <div style="flex:1">
+                  <div class="list-row-title">HD-2819 · Saree Set</div>
+                  <div class="list-row-sub">Yesterday</div>
+                </div>
+                <div class="delivery-price">₹45</div>
+              </div>
+            </div>
+          </div>
+          <div class="bottom-nav">
+            <div class="nav-item" onclick="showPage('seller','home')"><div class="nav-icon">🏠</div><div class="nav-label">Home</div></div>
+            <div class="nav-item" onclick="showPage('seller','orders')"><div class="nav-icon">📦</div><div class="nav-label">Orders</div></div>
+            <div class="nav-item active" onclick="showPage('seller','earnings')"><div class="nav-icon">💳</div><div class="nav-label">Earnings</div></div>
+            <div class="nav-item" onclick="showPage('seller','profile')"><div class="nav-icon">👤</div><div class="nav-label">Profile</div></div>
+          </div>
+        </div>
+
+        <!-- SELLER: PROFILE -->
+        <div class="page" id="seller-page-profile">
+          <div class="status-bar">
+            <span>9:41</span>
+            <span>●●●●  WiFi  🔋</span>
+          </div>
+          <div class="app-header">
+            <div class="page-title">Profile</div>
+          </div>
+          <div class="scroll-content">
+            <div class="profile-head">
+              <div class="profile-avatar">🏪</div>
+              <div>
+                <div class="profile-name">Meera's Boutique</div>
+                <div class="profile-sub">Kondapur, Hyderabad · ⭐ 4.9</div>
+              </div>
+            </div>
+            <div class="section" style="padding-top:0">
+              <div class="list-row" onclick="showToast('Opening store details...','seller')">
+                <div class="list-row-icon">🏬</div>
+                <div style="flex:1">
+                  <div class="list-row-title">Store Details</div>
+                  <div class="list-row-sub">Address, hours & contact</div>
+                </div>
+                <div class="list-row-arrow">›</div>
+              </div>
+              <div class="list-row" onclick="showToast('Opening pickup addresses...','seller')">
+                <div class="list-row-icon">📍</div>
+                <div style="flex:1">
+                  <div class="list-row-title">Pickup Addresses</div>
+                  <div class="list-row-sub">1 saved location</div>
+                </div>
+                <div class="list-row-arrow">›</div>
+              </div>
+              <div class="list-row" onclick="showToast('Opening payment settings...','seller')">
+                <div class="list-row-icon">💳</div>
+                <div style="flex:1">
+                  <div class="list-row-title">Payments & Billing</div>
+                  <div class="list-row-sub">UPI auto-pay enabled</div>
+                </div>
+                <div class="list-row-arrow">›</div>
+              </div>
+              <div class="list-row" onclick="showToast('Opening support chat...','seller')">
+                <div class="list-row-icon">💬</div>
+                <div style="flex:1">
+                  <div class="list-row-title">Help & Support</div>
+                  <div class="list-row-sub">Chat with HopDrop team</div>
+                </div>
+                <div class="list-row-arrow">›</div>
+              </div>
+              <div class="list-row" onclick="showPage('seller','ops')">
+                <div class="list-row-icon">📊</div>
+                <div style="flex:1">
+                  <div class="list-row-title">Operations Dashboard</div>
+                  <div class="list-row-sub">Platform-wide stats (admin view)</div>
+                </div>
+                <div class="list-row-arrow">›</div>
+              </div>
+              <div class="list-row" onclick="showToast('Logged out (demo)','seller')">
+                <div class="list-row-icon">🚪</div>
+                <div style="flex:1">
+                  <div class="list-row-title" style="color:var(--orange)">Log Out</div>
+                </div>
+                <div class="list-row-arrow">›</div>
+              </div>
+            </div>
+          </div>
+          <div class="bottom-nav">
+            <div class="nav-item" onclick="showPage('seller','home')"><div class="nav-icon">🏠</div><div class="nav-label">Home</div></div>
+            <div class="nav-item" onclick="showPage('seller','orders')"><div class="nav-icon">📦</div><div class="nav-label">Orders</div></div>
+            <div class="nav-item" onclick="showPage('seller','earnings')"><div class="nav-icon">💳</div><div class="nav-label">Earnings</div></div>
+            <div class="nav-item active" onclick="showPage('seller','profile')"><div class="nav-icon">👤</div><div class="nav-label">Profile</div></div>
+          </div>
+        </div>
+
+        <!-- SELLER: SHARED ROUTE FOUND (hero screen) -->
+        <div class="page" id="seller-page-route">
+          <div class="status-bar">
+            <span>9:41</span>
+            <span>●●●●  WiFi  🔋</span>
+          </div>
+          <div class="back-row">
+            <div class="back-btn" onclick="showPage('seller','home')">←</div>
+            <div class="page-title" style="font-size:18px;">Shared Route Found</div>
+          </div>
+          <div class="scroll-content">
+            <div class="section" style="padding-top:8px;">
+              <div class="info-chip blue">🔗 3 nearby deliveries detected on this route</div>
+
+              <div class="track-card" style="margin:0 0 14px;">
+                <div class="route-path">
+                  <div class="route-path-step">
+                    <div class="route-path-left">
+                      <div class="route-path-dot">1</div>
+                      <div class="route-path-line"></div>
+                    </div>
+                    <div class="route-path-content">
+                      <div class="route-path-title">Kondapur</div>
+                      <div class="route-path-sub">Pickup · Meera's Boutique (you)</div>
+                    </div>
+                  </div>
+                  <div class="route-path-step">
+                    <div class="route-path-left">
+                      <div class="route-path-dot">2</div>
+                      <div class="route-path-line"></div>
+                    </div>
+                    <div class="route-path-content">
+                      <div class="route-path-title" id="route-buyer-name">Madhapur</div>
+                      <div class="route-path-sub">Drop · <span id="route-drop-addr">your buyer</span></div>
+                    </div>
+                  </div>
+                  <div class="route-path-step">
+                    <div class="route-path-left">
+                      <div class="route-path-dot">3</div>
+                      <div class="route-path-line"></div>
+                    </div>
+                    <div class="route-path-content">
+                      <div class="route-path-title">Gachibowli</div>
+                      <div class="route-path-sub">Drop · Lakshmi Bakes order</div>
+                    </div>
+                  </div>
+                  <div class="route-path-step">
+                    <div class="route-path-left">
+                      <div class="route-path-dot end">4</div>
+                    </div>
+                    <div class="route-path-content">
+                      <div class="route-path-title">Jubilee Hills</div>
+                      <div class="route-path-sub">Drop · Ravi Electronics order</div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <div class="compare-row">
+                <div class="compare-card dim">
+                  <div class="compare-label">Individual Cost</div>
+                  <div class="compare-amt">₹280</div>
+                  <div class="compare-label" style="margin-top:4px; text-transform:none; font-weight:500;">3 separate trips</div>
+                </div>
+                <div class="compare-card win">
+                  <div class="compare-label">HopDrop Cost</div>
+                  <div class="compare-amt">₹120</div>
+                  <div class="compare-label" style="margin-top:4px; text-transform:none; font-weight:500;">1 shared route</div>
+                </div>
+              </div>
+            </div>
+
+            <div class="savings-banner">
+              <div class="big">You save ₹160</div>
+              <div class="small">57% cheaper than booking this delivery alone</div>
+            </div>
+
+            <div class="section">
+              <div class="section-title">Why this works</div>
+              <div class="list-row" style="cursor:default;">
+                <div class="list-row-icon">🧩</div>
+                <div style="flex:1">
+                  <div class="list-row-title">Overlapping routes consolidated</div>
+                  <div class="list-row-sub">3 sellers' deliveries share one rider trip</div>
+                </div>
+              </div>
+              <div class="list-row" style="cursor:default;">
+                <div class="list-row-icon">🛵</div>
+                <div style="flex:1">
+                  <div class="list-row-title">One vehicle, higher utilization</div>
+                  <div class="list-row-sub">4 stops on a single ~12 km loop</div>
+                </div>
+              </div>
+            </div>
+
+            <div class="section">
+              <button class="btn-primary" onclick="confirmRouteBooking()">Confirm Booking — ₹120</button>
+              <button class="btn-ghost" onclick="showPage('seller','home')">Cancel</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- SELLER: OPERATIONS DASHBOARD -->
+        <div class="page" id="seller-page-ops">
+          <div class="status-bar">
+            <span>9:41</span>
+            <span>●●●●  WiFi  🔋</span>
+          </div>
+          <div class="back-row">
+            <div class="back-btn" onclick="showPage('seller','profile')">←</div>
+            <div class="page-title" style="font-size:18px;">Operations Dashboard</div>
+          </div>
+          <div class="scroll-content">
+            <div class="section" style="padding-top:8px;">
+              <div class="info-chip blue">🟢 Today · Demo Environment</div>
+            </div>
+            <div class="ops-grid">
+              <div class="ops-card accent">
+                <div class="ops-num">12</div>
+                <div class="ops-label">Active Sellers</div>
+              </div>
+              <div class="ops-card blue">
+                <div class="ops-num">3</div>
+                <div class="ops-label">Active Riders</div>
+              </div>
+              <div class="ops-card">
+                <div class="ops-num">8</div>
+                <div class="ops-label">Deliveries Today</div>
+              </div>
+              <div class="ops-card green">
+                <div class="ops-num">3</div>
+                <div class="ops-label">Routes Consolidated</div>
+              </div>
+            </div>
+
+            <div class="section">
+              <div class="section-title">Vehicle Utilization</div>
+              <div class="track-card" style="margin:0 0 4px;">
+                <div class="util-row" style="margin-bottom:14px;">
+                  <div class="util-row-head"><span>Kondapur Cluster</span><span>82%</span></div>
+                  <div class="util-bar-bg"><div class="util-bar-fill" style="width:82%;"></div></div>
+                </div>
+                <div class="util-row" style="margin-bottom:14px;">
+                  <div class="util-row-head"><span>Kukatpally Cluster</span><span>68%</span></div>
+                  <div class="util-bar-bg"><div class="util-bar-fill" style="width:68%; background:var(--blue);"></div></div>
+                </div>
+                <div class="util-row" style="margin-bottom:0;">
+                  <div class="util-row-head"><span>Overall Average</span><span>75%</span></div>
+                  <div class="util-bar-bg"><div class="util-bar-fill" style="width:75%; background:var(--orange);"></div></div>
+                </div>
+              </div>
+            </div>
+
+            <div class="section">
+              <div class="section-title">Why Porter can't easily copy this</div>
+              <div class="list-row" style="cursor:default;">
+                <div class="list-row-icon">📈</div>
+                <div style="flex:1">
+                  <div class="list-row-title">Demand density</div>
+                  <div class="list-row-sub">12 sellers feed overlapping routes daily</div>
+                </div>
+              </div>
+              <div class="list-row" style="cursor:default;">
+                <div class="list-row-icon">🧠</div>
+                <div style="flex:1">
+                  <div class="list-row-title">Routing intelligence</div>
+                  <div class="list-row-sub">Consolidation decisions, not just trip-matching</div>
+                </div>
+              </div>
+              <div class="list-row" style="cursor:default;">
+                <div class="list-row-icon">🤝</div>
+                <div style="flex:1">
+                  <div class="list-row-title">Micro-merchant relationships</div>
+                  <div class="list-row-sub">Built for Instagram/WhatsApp sellers, not enterprise</div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- ==================== BUYER SCREEN ==================== -->
+      <div class="screen" id="screen-buyer">
+
+        <!-- BUYER: HOME / TRACK -->
+        <div class="page active" id="buyer-page-home">
+          <div class="status-bar">
+            <span>9:41</span>
+            <span>●●●●  WiFi  🔋</span>
+          </div>
+          <div class="app-header">
+            <div class="app-header-row">
+              <div class="logo">Hop<span>Drop</span></div>
+              <div class="avatar" onclick="showPage('buyer','profile')">🛍️</div>
+            </div>
+            <div class="greeting">Find & track your order, <strong>Priya</strong></div>
+          </div>
+
+          <div class="scroll-content">
+            <div class="section">
+              <div class="section-title">Track Your Order</div>
+            </div>
+
+            <div class="track-card">
+              <div style="display:flex; justify-content:space-between; align-items:center;">
+                <div>
+                  <div style="font-size:11px; color:var(--grey);">Order ID</div>
+                  <div style="font-family:'Plus Jakarta Sans',sans-serif; font-weight:800; font-size:16px; color:var(--ink);">HD-2841</div>
+                </div>
+                <span class="status-badge active">On the way 🏍️</span>
+              </div>
+
+              <div style="margin-top:12px; padding:12px; background:var(--bg); border-radius:12px; font-size:12px; color:var(--ink-mid);">
+                <strong style="color:var(--ink);">Floral Kurti (S)</strong> from <strong style="color:var(--orange);">Meera's Boutique</strong><br>
+                <span style="font-size:11px;">Kondapur · ⭐ 4.9</span>
+              </div>
+
+              <div class="track-steps">
+                <div class="track-step">
+                  <div class="track-step-left">
+                    <div class="track-icon done">✅</div>
+                    <div class="track-line done"></div>
+                  </div>
+                  <div class="track-content">
+                    <div class="track-step-title">Order Confirmed</div>
+                    <div class="track-step-sub">11:30 AM · Meera's Boutique</div>
+                  </div>
+                </div>
+                <div class="track-step">
+                  <div class="track-step-left">
+                    <div class="track-icon done">✅</div>
+                    <div class="track-line done"></div>
+                  </div>
+                  <div class="track-content">
+                    <div class="track-step-title">Picked Up</div>
+                    <div class="track-step-sub">11:48 AM · Rider: Ramesh K.</div>
+                  </div>
+                </div>
+                <div class="track-step">
+                  <div class="track-step-left">
+                    <div class="track-icon current">🏍️</div>
+                    <div class="track-line"></div>
+                  </div>
+                  <div class="track-content">
+                    <div class="track-step-title">Out for Delivery</div>
+                    <div class="track-step-sub">ETA 12:15 PM · 3.2 km away</div>
+                  </div>
+                </div>
+                <div class="track-step">
+                  <div class="track-step-left">
+                    <div class="track-icon upcoming">📬</div>
+                  </div>
+                  <div class="track-content">
+                    <div class="track-step-title" style="color:var(--grey);">Delivered</div>
+                    <div class="track-step-sub">Madhapur, your address</div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Map -->
+            <div class="map-placeholder">
+              <div class="map-grid"></div>
+              <div class="map-pin">📍</div>
+              <span>Live tracking · Rider 3.2km away</span>
+            </div>
+
+            <div class="section">
+              <button class="btn-secondary" onclick="showToast('📞 Calling Ramesh K. (rider)...','buyer')">Call Rider</button>
+              <button class="btn-ghost" onclick="showToast('💬 Opening chat with seller...','buyer')">Message Seller</button>
+            </div>
+          </div>
+
+          <div class="bottom-nav">
+            <div class="nav-item active" onclick="showPage('buyer','home')"><div class="nav-icon">🏠</div><div class="nav-label">Track</div></div>
+            <div class="nav-item" onclick="showPage('buyer','orders')"><div class="nav-icon">📦</div><div class="nav-label">Orders</div></div>
+            <div class="nav-item" onclick="showPage('buyer','profile')"><div class="nav-icon">👤</div><div class="nav-label">Profile</div></div>
+          </div>
+
+          <div class="toast" id="toast-buyer"></div>
+        </div>
+
+        <!-- BUYER: ORDERS -->
+        <div class="page" id="buyer-page-orders">
+          <div class="status-bar">
+            <span>9:41</span>
+            <span>●●●●  WiFi  🔋</span>
+          </div>
+          <div class="app-header">
+            <div class="page-title">My Orders</div>
+            <div class="greeting">Everything you've ordered through HopDrop</div>
+          </div>
+          <div class="scroll-content">
+            <div class="section">
+              <div class="section-title">Active</div>
+              <div class="delivery-card">
+                <div class="delivery-card-header">
+                  <div>
+                    <div class="delivery-id">HD-2841 · Today 11:30 AM</div>
+                    <div class="delivery-name">Floral Kurti (S)</div>
+                  </div>
+                  <span class="status-badge active">On the way</span>
+                </div>
+                <div class="route-line"><div class="route-dot pickup"></div> Meera's Boutique, Kondapur</div>
+                <div class="route-connector" style="margin-left:3px;"></div>
+                <div class="route-line"><div class="route-dot drop"></div> Madhapur, You</div>
+                <div class="delivery-footer">
+                  <div class="delivery-price">₹35</div>
+                  <div class="delivery-time">ETA 12:15 PM</div>
+                </div>
+              </div>
+            </div>
+            <div class="section">
+              <div class="section-title">Past Orders</div>
+              <div class="delivery-card">
+                <div class="delivery-card-header">
+                  <div>
+                    <div class="delivery-id">HD-2719 · Last week</div>
+                    <div class="delivery-name">Brownie Box (6 pc)</div>
+                  </div>
+                  <span class="status-badge delivered">Delivered ✓</span>
+                </div>
+                <div class="route-line"><div class="route-dot pickup"></div> Lakshmi Bakes, Gachibowli</div>
+                <div class="route-connector" style="margin-left:3px;"></div>
+                <div class="route-line"><div class="route-dot drop"></div> Madhapur, You</div>
+                <div class="delivery-footer">
+                  <div class="delivery-price">₹45</div>
+                  <div class="delivery-time">Delivered 5:20 PM</div>
+                </div>
+              </div>
+              <div class="delivery-card">
+                <div class="delivery-card-header">
+                  <div>
+                    <div class="delivery-id">HD-2654 · 2 weeks ago</div>
+                    <div class="delivery-name">Phone Case + Cable</div>
+                  </div>
+                  <span class="status-badge delivered">Delivered ✓</span>
+                </div>
+                <div class="route-line"><div class="route-dot pickup"></div> Ravi Electronics, Madhapur</div>
+                <div class="route-connector" style="margin-left:3px;"></div>
+                <div class="route-line"><div class="route-dot drop"></div> Madhapur, You</div>
+                <div class="delivery-footer">
+                  <div class="delivery-price">₹35</div>
+                  <div class="delivery-time">Delivered 1:05 PM</div>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="bottom-nav">
+            <div class="nav-item" onclick="showPage('buyer','home')"><div class="nav-icon">🏠</div><div class="nav-label">Track</div></div>
+            <div class="nav-item active" onclick="showPage('buyer','orders')"><div class="nav-icon">📦</div><div class="nav-label">Orders</div></div>
+            <div class="nav-item" onclick="showPage('buyer','profile')"><div class="nav-icon">👤</div><div class="nav-label">Profile</div></div>
+          </div>
+        </div>
+
+        <!-- BUYER: PROFILE -->
+        <div class="page" id="buyer-page-profile">
+          <div class="status-bar">
+            <span>9:41</span>
+            <span>●●●●  WiFi  🔋</span>
+          </div>
+          <div class="app-header">
+            <div class="page-title">Profile</div>
+          </div>
+          <div class="scroll-content">
+            <div class="profile-head">
+              <div class="profile-avatar">🛍️</div>
+              <div>
+                <div class="profile-name">Priya Sharma</div>
+                <div class="profile-sub">Madhapur, Hyderabad</div>
+              </div>
+            </div>
+            <div class="section" style="padding-top:0">
+              <div class="list-row" onclick="showToast('Opening saved addresses...','buyer')">
+                <div class="list-row-icon">📍</div>
+                <div style="flex:1">
+                  <div class="list-row-title">Saved Addresses</div>
+                  <div class="list-row-sub">Home, Work</div>
+                </div>
+                <div class="list-row-arrow">›</div>
+              </div>
+              <div class="list-row" onclick="showToast('Opening payment methods...','buyer')">
+                <div class="list-row-icon">💳</div>
+                <div style="flex:1">
+                  <div class="list-row-title">Payment Methods</div>
+                  <div class="list-row-sub">UPI · Cards</div>
+                </div>
+                <div class="list-row-arrow">›</div>
+              </div>
+              <div class="list-row" onclick="showToast('Opening notification settings...','buyer')">
+                <div class="list-row-icon">🔔</div>
+                <div style="flex:1">
+                  <div class="list-row-title">Notifications</div>
+                  <div class="list-row-sub">Order updates on</div>
+                </div>
+                <div class="list-row-arrow">›</div>
+              </div>
+              <div class="list-row" onclick="showToast('Opening support chat...','buyer')">
+                <div class="list-row-icon">💬</div>
+                <div style="flex:1">
+                  <div class="list-row-title">Help & Support</div>
+                  <div class="list-row-sub">Chat with HopDrop team</div>
+                </div>
+                <div class="list-row-arrow">›</div>
+              </div>
+              <div class="list-row" onclick="showToast('Logged out (demo)','buyer')">
+                <div class="list-row-icon">🚪</div>
+                <div style="flex:1">
+                  <div class="list-row-title" style="color:var(--orange)">Log Out</div>
+                </div>
+                <div class="list-row-arrow">›</div>
+              </div>
+            </div>
+          </div>
+          <div class="bottom-nav">
+            <div class="nav-item" onclick="showPage('buyer','home')"><div class="nav-icon">🏠</div><div class="nav-label">Track</div></div>
+            <div class="nav-item" onclick="showPage('buyer','orders')"><div class="nav-icon">📦</div><div class="nav-label">Orders</div></div>
+            <div class="nav-item active" onclick="showPage('buyer','profile')"><div class="nav-icon">👤</div><div class="nav-label">Profile</div></div>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- ==================== RIDER SCREEN ==================== -->
+      <div class="screen" id="screen-rider">
+
+        <!-- RIDER: HOME / BATCHES -->
+        <div class="page active" id="rider-page-home">
+          <div class="status-bar">
+            <span>9:41</span>
+            <span>●●●●  WiFi  🔋</span>
+          </div>
+          <div class="app-header">
+            <div class="app-header-row">
+              <div class="logo">Hop<span>Drop</span></div>
+              <div class="avatar" onclick="showPage('rider','profile')">🏍️</div>
+            </div>
+            <div class="greeting">Hey <strong>Ramesh</strong> · You're online 🟢</div>
+          </div>
+
+          <div class="scroll-content">
+            <div class="stats-row">
+              <div class="stat-card">
+                <div class="stat-num">₹840</div>
+                <div class="stat-label">Today's earnings</div>
+              </div>
+              <div class="stat-card">
+                <div class="stat-num">14</div>
+                <div class="stat-label">Drops done</div>
+              </div>
+              <div class="stat-card">
+                <div class="stat-num">4.8⭐</div>
+                <div class="stat-label">Your rating</div>
+              </div>
+            </div>
+
+            <div class="section">
+              <div class="section-title">Available Batches Near You</div>
+              <div class="info-chip blue">💡 Batches = multiple pickups, one trip, more ₹₹</div>
+
+              <!-- Batch 1 - active -->
+              <div class="batch-card" id="batch1">
+                <div class="batch-header">
+                  <div>
+                    <div class="batch-title">Kondapur Cluster · 4 stops</div>
+                    <div style="font-size:11px; color:var(--grey); margin-top:2px;">📍 0.8 km from you</div>
+                  </div>
+                  <div class="batch-earn">₹160</div>
+                </div>
+                <div class="batch-stops">
+                  <div class="stop-item"><div class="stop-num">1</div>Pickup: Meera's Boutique → Drop: Madhapur</div>
+                  <div class="stop-item"><div class="stop-num">2</div>Pickup: Lakshmi Bakes → Drop: HITEC City</div>
+                  <div class="stop-item"><div class="stop-num">3</div>Pickup: Ravi Electronics → Drop: Gachibowli</div>
+                  <div class="stop-item"><div class="stop-num">4</div>Pickup: Sai Stores → Drop: Jubilee Hills</div>
+                </div>
+                <div class="batch-meta">
+                  <span>📦 4 parcels</span>
+                  <span>🛣️ ~12 km total</span>
+                  <span>⏱️ ~45 min</span>
+                </div>
+                <button class="btn-primary" style="margin-top:12px;" onclick="acceptBatch()">Accept Batch · ₹160</button>
+              </div>
+
+              <!-- Batch 2 -->
+              <div class="batch-card" style="border-left-color: var(--grey);">
+                <div class="batch-header">
+                  <div>
+                    <div class="batch-title">Kukatpally Cluster · 3 stops</div>
+                    <div style="font-size:11px; color:var(--grey); margin-top:2px;">📍 2.1 km from you</div>
+                  </div>
+                  <div class="batch-earn">₹105</div>
+                </div>
+                <div class="batch-stops">
+                  <div class="stop-item"><div class="stop-num">1</div>Pickup: Ananya Crafts → Drop: SR Nagar</div>
+                  <div class="stop-item"><div class="stop-num">2</div>Pickup: FreshBox Kitchen → Drop: Ameerpet</div>
+                  <div class="stop-item"><div class="stop-num">3</div>Pickup: Zara Handlooms → Drop: Begumpet</div>
+                </div>
+                <div class="batch-meta">
+                  <span>📦 3 parcels</span>
+                  <span>🛣️ ~9 km total</span>
+                  <span>⏱️ ~35 min</span>
+                </div>
+                <button class="btn-secondary" onclick="acceptBatch2(this)">Accept Batch · ₹105</button>
+              </div>
+            </div>
+          </div>
+
+          <div class="bottom-nav">
+            <div class="nav-item active" onclick="showPage('rider','home')"><div class="nav-icon">🏠</div><div class="nav-label">Batches</div></div>
+            <div class="nav-item" onclick="showPage('rider','map')"><div class="nav-icon">🗺️</div><div class="nav-label">Map</div></div>
+            <div class="nav-item" onclick="showPage('rider','earnings')"><div class="nav-icon">💰</div><div class="nav-label">Earnings</div></div>
+            <div class="nav-item" onclick="showPage('rider','profile')"><div class="nav-icon">👤</div><div class="nav-label">Profile</div></div>
+          </div>
+
+          <div class="toast" id="toast-rider"></div>
+        </div>
+
+        <!-- RIDER: MAP -->
+        <div class="page" id="rider-page-map">
+          <div class="status-bar">
+            <span>9:41</span>
+            <span>●●●●  WiFi  🔋</span>
+          </div>
+          <div class="app-header">
+            <div class="page-title">Live Map</div>
+            <div class="greeting">Your current route & next stop</div>
+          </div>
+          <div class="scroll-content">
+            <div class="map-placeholder" style="height:260px;">
+              <div class="map-grid"></div>
+              <div class="map-pin">📍</div>
+              <span>Kondapur Cluster · Stop 1 of 4</span>
+            </div>
+            <div class="section">
+              <div class="section-title">Next Stop</div>
+              <div class="delivery-card">
+                <div class="delivery-card-header">
+                  <div>
+                    <div class="delivery-id">Pickup · Stop 1</div>
+                    <div class="delivery-name">Meera's Boutique, Kondapur</div>
+                  </div>
+                  <span class="status-badge active">0.8 km</span>
+                </div>
+                <button class="btn-primary" style="margin-top:10px;" onclick="showToast('🗺️ Opening navigation...','rider')">Navigate</button>
+              </div>
+            </div>
+          </div>
+          <div class="bottom-nav">
+            <div class="nav-item" onclick="showPage('rider','home')"><div class="nav-icon">🏠</div><div class="nav-label">Batches</div></div>
+            <div class="nav-item active" onclick="showPage('rider','map')"><div class="nav-icon">🗺️</div><div class="nav-label">Map</div></div>
+            <div class="nav-item" onclick="showPage('rider','earnings')"><div class="nav-icon">💰</div><div class="nav-label">Earnings</div></div>
+            <div class="nav-item" onclick="showPage('rider','profile')"><div class="nav-icon">👤</div><div class="nav-label">Profile</div></div>
+          </div>
+        </div>
+
+        <!-- RIDER: EARNINGS -->
+        <div class="page" id="rider-page-earnings">
+          <div class="status-bar">
+            <span>9:41</span>
+            <span>●●●●  WiFi  🔋</span>
+          </div>
+          <div class="app-header">
+            <div class="page-title">Earnings</div>
+          </div>
+          <div class="scroll-content">
+            <div class="earnings-hero">
+              <div class="earnings-hero-label">Today's earnings</div>
+              <div class="earnings-hero-num">₹840</div>
+              <div class="earnings-hero-row">
+                <div>Drops<strong>14</strong></div>
+                <div>Online time<strong>5h 20m</strong></div>
+                <div>Per drop avg<strong>₹60</strong></div>
+              </div>
+            </div>
+            <div class="section">
+              <div class="section-title">This Week</div>
+              <div class="list-row">
+                <div class="list-row-icon">📅</div>
+                <div style="flex:1">
+                  <div class="list-row-title">Monday</div>
+                  <div class="list-row-sub">12 drops</div>
+                </div>
+                <div class="delivery-price">₹720</div>
+              </div>
+              <div class="list-row">
+                <div class="list-row-icon">📅</div>
+                <div style="flex:1">
+                  <div class="list-row-title">Tuesday</div>
+                  <div class="list-row-sub">15 drops</div>
+                </div>
+                <div class="delivery-price">₹890</div>
+              </div>
+              <div class="list-row">
+                <div class="list-row-icon">📅</div>
+                <div style="flex:1">
+                  <div class="list-row-title">Today</div>
+                  <div class="list-row-sub">14 drops · in progress</div>
+                </div>
+                <div class="delivery-price">₹840</div>
+              </div>
+            </div>
+          </div>
+          <div class="bottom-nav">
+            <div class="nav-item" onclick="showPage('rider','home')"><div class="nav-icon">🏠</div><div class="nav-label">Batches</div></div>
+            <div class="nav-item" onclick="showPage('rider','map')"><div class="nav-icon">🗺️</div><div class="nav-label">Map</div></div>
+            <div class="nav-item active" onclick="showPage('rider','earnings')"><div class="nav-icon">💰</div><div class="nav-label">Earnings</div></div>
+            <div class="nav-item" onclick="showPage('rider','profile')"><div class="nav-icon">👤</div><div class="nav-label">Profile</div></div>
+          </div>
+        </div>
+
+        <!-- RIDER: PROFILE -->
+        <div class="page" id="rider-page-profile">
+          <div class="status-bar">
+            <span>9:41</span>
+            <span>●●●●  WiFi  🔋</span>
+          </div>
+          <div class="app-header">
+            <div class="page-title">Profile</div>
+          </div>
+          <div class="scroll-content">
+            <div class="profile-head">
+              <div class="profile-avatar">🏍️</div>
+              <div>
+                <div class="profile-name">Ramesh Kumar</div>
+                <div class="profile-sub">Two-wheeler · ⭐ 4.8 · 312 drops</div>
+              </div>
+            </div>
+            <div class="section" style="padding-top:0">
+              <div class="list-row" onclick="showToast('Opening vehicle details...','rider')">
+                <div class="list-row-icon">🛵</div>
+                <div style="flex:1">
+                  <div class="list-row-title">Vehicle Details</div>
+                  <div class="list-row-sub">TS09 AB 1234</div>
+                </div>
+                <div class="list-row-arrow">›</div>
+              </div>
+              <div class="list-row" onclick="showToast('Opening bank & payouts...','rider')">
+                <div class="list-row-icon">🏦</div>
+                <div style="flex:1">
+                  <div class="list-row-title">Bank & Payouts</div>
+                  <div class="list-row-sub">Daily payout enabled</div>
+                </div>
+                <div class="list-row-arrow">›</div>
+              </div>
+              <div class="list-row" onclick="showToast('Opening documents...','rider')">
+                <div class="list-row-icon">📄</div>
+                <div style="flex:1">
+                  <div class="list-row-title">Documents</div>
+                  <div class="list-row-sub">License & RC verified</div>
+                </div>
+                <div class="list-row-arrow">›</div>
+              </div>
+              <div class="list-row" onclick="showToast('Opening support chat...','rider')">
+                <div class="list-row-icon">💬</div>
+                <div style="flex:1">
+                  <div class="list-row-title">Help & Support</div>
+                  <div class="list-row-sub">Chat with HopDrop team</div>
+                </div>
+                <div class="list-row-arrow">›</div>
+              </div>
+              <div class="list-row" onclick="showToast('Logged out (demo)','rider')">
+                <div class="list-row-icon">🚪</div>
+                <div style="flex:1">
+                  <div class="list-row-title" style="color:var(--orange)">Log Out</div>
+                </div>
+                <div class="list-row-arrow">›</div>
+              </div>
+            </div>
+          </div>
+          <div class="bottom-nav">
+            <div class="nav-item" onclick="showPage('rider','home')"><div class="nav-icon">🏠</div><div class="nav-label">Batches</div></div>
+            <div class="nav-item" onclick="showPage('rider','map')"><div class="nav-icon">🗺️</div><div class="nav-label">Map</div></div>
+            <div class="nav-item" onclick="showPage('rider','earnings')"><div class="nav-icon">💰</div><div class="nav-label">Earnings</div></div>
+            <div class="nav-item active" onclick="showPage('rider','profile')"><div class="nav-icon">👤</div><div class="nav-label">Profile</div></div>
+          </div>
+        </div>
+
+      </div>
+
+    </div><!-- end phone-screen -->
+  </div><!-- end phone-frame -->
+
+</div><!-- end desktop-wrapper -->
+
+<script>
+  let selectedSize = { label: 'Small', price: 35 };
+
+  function switchRole(role, evt) {
+    document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+    document.querySelectorAll('.role-btn').forEach(b => b.classList.remove('active'));
+    document.getElementById('screen-' + role).classList.add('active');
+    if (evt) evt.currentTarget.classList.add('active');
+  }
+
+  function showPage(role, page) {
+    document.querySelectorAll('#screen-' + role + ' .page').forEach(p => p.classList.remove('active'));
+    document.getElementById(role + '-page-' + page).classList.add('active');
+  }
+
+  function selectSize(el, price) {
+    document.querySelectorAll('.size-opt').forEach(o => o.classList.remove('selected'));
+    el.classList.add('selected');
+    selectedSize.price = price;
+    document.getElementById('book-btn').textContent = 'Book Delivery — ₹' + price;
+  }
+
+  function bookDelivery() {
+    const drop = document.getElementById('drop-addr').value;
+    const name = document.getElementById('buyer-name').value;
+    if (!drop || !name) {
+      showToast('⚠️ Please fill in drop address and buyer name', 'seller');
+      return;
+    }
+    document.getElementById('route-drop-addr').textContent = drop;
+    document.getElementById('route-buyer-name').textContent = name;
+    showPage('seller','route');
+  }
+
+  function confirmRouteBooking() {
+    showPage('seller','home');
+    showToast('✅ Delivery booked on shared route! Rider assigned in ~3 min', 'seller');
+    document.getElementById('drop-addr').value = '';
+    document.getElementById('buyer-name').value = '';
+    document.getElementById('buyer-phone').value = '';
+  }
+
+  function acceptBatch() {
+    const batch = document.getElementById('batch1');
+    batch.style.borderLeftColor = 'var(--green)';
+    const btn = batch.querySelector('.btn-primary');
+    btn.textContent = '🏍️ Navigating to first pickup...';
+    btn.style.background = 'var(--green)';
+    btn.onclick = null;
+    showToast('🏍️ Batch accepted! Head to Kondapur for first pickup', 'rider');
+  }
+
+  function acceptBatch2(btn) {
+    const batch = btn.closest('.batch-card');
+    batch.style.borderLeftColor = 'var(--green)';
+    btn.textContent = '🏍️ Navigating to first pickup...';
+    btn.style.background = 'var(--green-light)';
+    btn.style.color = 'var(--green)';
+    btn.onclick = null;
+    showToast('🏍️ Batch accepted! Head to Kukatpally for first pickup', 'rider');
+  }
+
+  function showToast(msg, screen) {
+    const toast = document.getElementById('toast-' + screen);
+    if (!toast) return;
+    toast.textContent = msg;
+    toast.style.display = 'block';
+    setTimeout(() => { toast.style.display = 'none'; }, 2800);
+  }
+</script>
+
+</body>
+</html>
